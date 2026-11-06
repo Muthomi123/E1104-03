@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Consent Gap: do we really control our personal data online?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EFF3; --surface:#FFFFFF; --ink:#12223D; --muted:#55627A; --line:#C3CFDA;
+  --act:#1F4E79; --act-ink:#FFFFFF; --mark:#FFD45C; --mark-ink:#12223D; --bar:#1F4E79; --bar2:#8FA9C4; --warn:#A33A12;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1520; --surface:#162131; --ink:#E3EAF2; --muted:#9DAABB; --line:#2A3A4E;
+    --act:#86B6E6; --act-ink:#0E1520; --mark:#E9BE3F; --mark-ink:#0E1520; --bar:#86B6E6; --bar2:#45607F; --warn:#F2A07B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1520; --surface:#162131; --ink:#E3EAF2; --muted:#9DAABB; --line:#2A3A4E;
+  --act:#86B6E6; --act-ink:#0E1520; --mark:#E9BE3F; --mark-ink:#0E1520; --bar:#86B6E6; --bar2:#45607F; --warn:#F2A07B;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.65 "Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+.prose{max-width:66ch}
+h1,h2,h3{font-family:"Bricolage Grotesque","Public Sans",system-ui,sans-serif;letter-spacing:-0.02em;margin:0}
+h1{font-size:clamp(2.6rem,7.5vw,5.2rem);font-weight:800;line-height:.98}
+h2{font-size:clamp(1.7rem,3.8vw,2.5rem);font-weight:800;line-height:1.08;margin-bottom:18px;max-width:22ch}
+h3{font-size:1.15rem;font-weight:600;margin-bottom:6px}
+p{margin:0 0 1em}
+a{color:var(--act)}
+:focus-visible{outline:3px solid var(--act);outline-offset:3px}
+.muted{color:var(--muted)}
+.small{font-size:.9rem}
+
+/* hero */
+header.hero{padding:64px 0 40px}
+.hero .sub{font-size:clamp(1.15rem,2.4vw,1.45rem);color:var(--muted);margin:18px 0 28px;max-width:40ch}
+.byline{font-size:.92rem;color:var(--muted)}
+.banner{margin-top:36px;background:var(--surface);border:2px solid var(--ink);border-radius:18px;padding:26px;max-width:620px;box-shadow:8px 8px 0 var(--ink)}
+.banner h3{font-size:1.35rem}
+.banner .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.b{font:inherit;font-weight:600;border-radius:10px;padding:12px 18px;cursor:pointer;border:2px solid var(--act)}
+.b.primary{background:var(--act);color:var(--act-ink);font-size:1.05rem;padding:14px 26px}
+.b.quiet{background:transparent;color:var(--muted);border-color:transparent;text-decoration:underline;padding:12px 8px}
+.b.outline{background:transparent;color:var(--act)}
+.outcome{background:var(--mark);color:var(--mark-ink);border-radius:12px;padding:16px 18px;margin-top:16px}
+.outcome p:last-child{margin:0}
+.rqs{margin:48px 0 0;padding:22px 0 0;border-top:2px solid var(--ink)}
+.rqs ol{margin:8px 0 0;padding-left:1.3em;max-width:70ch}
+.rqs li{margin-bottom:6px}
+
+/* sections */
+section.chapter{padding:72px 0 8px}
+.kicker{font-weight:600;color:var(--muted);margin-bottom:8px;font-size:.95rem}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;margin:26px 0}
+.chart h3{margin-bottom:4px}
+.chart .src{font-size:.82rem;color:var(--muted);margin-top:14px}
+.bars{display:grid;gap:14px;margin-top:16px}
+.barrow{display:grid;grid-template-columns:minmax(150px,34%) 1fr;gap:14px;align-items:center}
+@media (max-width:620px){.barrow{grid-template-columns:1fr;gap:4px}}
+.barlabel{font-size:.95rem}
+.track{position:relative;height:34px;background:var(--bg);border-radius:6px}
+.fill{position:absolute;inset:0 auto 0 0;width:0;background:var(--bar);border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;color:var(--act-ink);font-weight:600;font-variant-numeric:tabular-nums;transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.fill.alt{background:var(--bar2);color:var(--ink)}
+.fill.hot{background:var(--mark);color:var(--mark-ink)}
+.fill.small-n{padding:0}
+.fill.small-n span{position:absolute;left:calc(100% + 8px);color:var(--ink);white-space:nowrap}
+.callout{font-family:"Bricolage Grotesque","Public Sans",sans-serif;font-size:clamp(1.3rem,3vw,1.75rem);font-weight:600;line-height:1.25;border-left:6px solid var(--mark);padding:4px 0 4px 18px;margin:28px 0;max-width:34ch}
+
+/* calculator */
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+@media (max-width:760px){.calc{grid-template-columns:1fr}}
+.checks label{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--bg)}
+.checks input{width:20px;height:20px;accent-color:var(--act)}
+.checks .t{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums;font-size:.92rem}
+.total{font-family:"Bricolage Grotesque","Public Sans",sans-serif;font-size:clamp(2.6rem,7vw,4rem);font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.compare{margin-top:12px}
+.scale{position:relative;height:70px;margin:34px 6px 10px}
+.scale .axis{position:absolute;left:0;right:0;top:34px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--warn),var(--mark) 60%,var(--bar) 100%);opacity:.85}
+.scale .line60{position:absolute;top:22px;height:32px;border-left:2px dashed var(--ink)}
+.scale .dot{position:absolute;top:26px;width:24px;height:24px;margin-left:-12px;border-radius:50%;background:var(--surface);border:3px solid var(--ink);display:grid;place-items:center;font-size:.62rem;font-weight:700}
+.scale .tick{position:absolute;top:50px;font-size:.78rem;color:var(--muted);transform:translateX(-50%)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.88rem;color:var(--muted)}
+.tablewrap{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.93rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:10px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}
+
+/* timeline */
+.timeline{list-style:none;margin:24px 0 0;padding:0;border-left:3px solid var(--ink)}
+.timeline li{position:relative;padding:0 0 22px 24px;max-width:64ch}
+.timeline li::before{content:"";position:absolute;left:-9px;top:6px;width:15px;height:15px;border-radius:50%;background:var(--surface);border:3px solid var(--ink)}
+.timeline li.tight::before{background:var(--mark)}
+.timeline li.loose::before{background:var(--warn)}
+.timeline .d{font-weight:600}
+
+/* theory + manifesto */
+.theory{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:24px 0}
+.theory div{border-top:3px solid var(--ink);padding-top:12px}
+.theory p{font-size:.96rem}
+.manifesto{background:var(--ink);color:var(--bg);border-radius:18px;padding:30px;margin:30px 0}
+.manifesto h3{font-size:1.4rem;margin-bottom:12px;color:var(--bg)}
+.manifesto ol{margin:0;padding-left:1.3em}
+.manifesto li{margin-bottom:12px;max-width:62ch}
+.manifesto strong{color:var(--mark)}
+
+/* banner diagrams */
+.wires{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;margin-top:18px}
+.wires figure{margin:0}
+.wires .wide{grid-column:1/-1}
+.pair{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.pair .arrow{font-size:1.4rem;color:var(--muted)}
+@media (max-width:620px){.pair{grid-template-columns:1fr}.pair .arrow{transform:rotate(90deg);justify-self:center}}
+.frame{border:2px solid var(--ink);border-radius:12px;overflow:hidden;background:var(--bg)}
+.frame .chrome{height:22px;border-bottom:2px solid var(--ink);display:flex;align-items:center;gap:5px;padding:0 9px;background:var(--surface)}
+.frame .chrome i{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--ink)}
+.wpage{position:relative;height:190px;padding:14px}
+.wpage .ln{height:8px;border-radius:4px;background:var(--line);margin-bottom:9px}
+.wpage .ln.s{width:60%}
+.cb{position:absolute;left:10px;right:10px;bottom:10px;background:var(--surface);border:1.5px solid var(--ink);border-radius:8px;padding:10px}
+.cb.wall{top:14px;bottom:14px;display:flex;flex-direction:column;justify-content:center}
+.cb .q{height:7px;width:72%;background:var(--muted);opacity:.45;border-radius:4px;margin-bottom:5px}
+.cb .q.s{width:48%}
+.cb .row{display:flex;gap:6px;margin-top:9px;align-items:center;flex-wrap:wrap}
+.wb{font-size:.72rem;font-weight:600;line-height:1.2;padding:6px 10px;border-radius:6px;background:var(--act);color:var(--act-ink)}
+.wb.link{background:none;color:var(--muted);text-decoration:underline;padding:6px 2px;font-weight:400}
+.wb.pay{background:transparent;color:var(--warn);border:1.5px dashed var(--warn)}
+.tag{display:inline-block;font-size:.76rem;font-weight:600;padding:2px 9px;border-radius:999px;border:1.5px solid var(--ink);margin:10px 0 4px}
+.tag.nudge{background:var(--mark);color:var(--mark-ink);border-color:var(--mark)}
+.tag.paid{background:var(--warn);color:var(--surface);border-color:var(--warn)}
+.wires figcaption{font-size:.9rem}
+.wkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:.86rem;color:var(--muted);margin-top:12px}
+
+footer{padding:60px 0 80px}
+.refs{font-size:.9rem;padding-left:0;list-style:none;max-width:80ch}
+.refs li{margin-bottom:8px;padding-left:1.5em;text-indent:-1.5em}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="hero wrap">
+  <h1>The Consent Gap</h1>
+  <p class="sub">We click ‘accept’ dozens of times a week. Do we really control what happens to our personal data?</p>
+
+  <div class="banner" id="banner" aria-live="polite">
+    <div id="bStep1">
+      <h3>Before you read on, can we personalise your ads?</h3>
+      <p class="muted">We and 847 partners would like to use cookies to understand you better.</p>
+      <div class="btns">
+        <button class="b primary" data-choice="accept">Accept all</button>
+        <button class="b quiet" data-choice="reject">Reject all</button>
+      </div>
+    </div>
+    <div id="bStep2" hidden>
+      <h3>Rejecting personalised ads costs £5 a month</h3>
+      <p class="muted">Keep reading free by accepting, or subscribe to refuse tracking.</p>
+      <div class="btns">
+        <button class="b primary" data-choice="accept">Accept all and read free</button>
+        <button class="b outline" data-choice="pay">Pay £5 a month</button>
+        <button class="b quiet" data-choice="leave">Leave the site</button>
+      </div>
+    </div>
+    <div id="bOutcome" hidden>
+      <div class="outcome"><p id="outcomeText"></p></div>
+      <div class="btns"><button class="b outline" id="again">Try again</button></div>
+    </div>
+  </div>
+  <p class="small muted" style="margin-top:14px">This banner is a demonstration. Nothing is tracked or charged.</p>
+
+  <div class="rqs">
+    <p class="prose">This project tests whether the ‘consent’ we give online amounts to real control. It combines the UK Information Commissioner’s Office (ICO) Public Attitudes survey of 8,019 UK adults (ICO, 2025) with my own audit of five platforms’ privacy policies and cookie banners. It asks three questions:</p>
+    <ol>
+      <li>How aware are people of data collection and of their data rights?</li>
+      <li>Does consent, as currently designed, produce real understanding and control?</li>
+      <li>Who bears the cost of the consent gap, and can regulation close it?</li>
+    </ol>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section class="chapter" id="understanding">
+  <p class="kicker">Research question 2</p>
+  <h2>Clicking ‘yes’ is not the same as understanding</h2>
+  <div class="prose">
+    <p>Data protection law treats consent as the moment a person takes charge of their data. To be valid, it must be freely given, specific and informed. The ICO’s own survey suggests that, in practice, the moment rarely produces understanding or control.</p>
+    <p>When asked about ‘consent or pay’ choices, where a website asks users to accept tracking or pay a fee, almost nine in ten respondents claimed at least some understanding. Yet 42% admitted they were not entirely sure what the options meant, and fewer than one in five felt either informed or in control.</p>
+  </div>
+  <div class="chart" data-anim>
+    <h3>From claimed understanding to felt control</h3>
+    <p class="muted small">UK adults responding to ‘consent or pay’ choices, % of respondents</p>
+    <div class="bars">
+      <div class="barrow"><span class="barlabel">Claim at least some understanding</span><div class="track"><div class="fill" data-v="89">89%</div></div></div>
+      <div class="barrow"><span class="barlabel">Not entirely sure what the options mean</span><div class="track"><div class="fill alt" data-v="42">42%</div></div></div>
+      <div class="barrow"><span class="barlabel">Feel informed</span><div class="track"><div class="fill hot" data-v="19">19%</div></div></div>
+      <div class="barrow"><span class="barlabel">Feel in control</span><div class="track"><div class="fill hot" data-v="19">19%</div></div></div>
+    </div>
+    <p class="src">Source: ICO (2025) Public Attitudes to Information Rights. Online survey of 8,019 UK adults, January to February 2025.</p>
+  </div>
+  <p class="callout">The gap between 89% and 19% is the consent gap.</p>
+  <div class="prose">
+    <p>The emotions people report are telling. Scepticism (24%) was more common than feeling informed, and many felt pressured (17%) or frustrated (16%). Draper and Turow (2019) call this ‘digital resignation’: people go along with data collection not because they agree with it, but because they believe resistance is futile. Consent becomes a ritual rather than a decision.</p>
+  </div>
+  <div class="chart" data-anim>
+    <h3>How people feel when asked to ‘consent or pay’</h3>
+    <p class="muted small">% of UK adults</p>
+    <div class="bars">
+      <div class="barrow"><span class="barlabel">Sceptical</span><div class="track"><div class="fill" data-v="24">24%</div></div></div>
+      <div class="barrow"><span class="barlabel">Informed</span><div class="track"><div class="fill alt" data-v="19">19%</div></div></div>
+      <div class="barrow"><span class="barlabel">In control</span><div class="track"><div class="fill alt" data-v="19">19%</div></div></div>
+      <div class="barrow"><span class="barlabel">Pressured</span><div class="track"><div class="fill" data-v="17">17%</div></div></div>
+      <div class="barrow"><span class="barlabel">Frustrated</span><div class="track"><div class="fill" data-v="16">16%</div></div></div>
+    </div>
+    <p class="src">Source: ICO (2025).</p>
+  </div>
+</section>
+
+<section class="chapter" id="price">
+  <p class="kicker">Research question 2</p>
+  <h2>The price of saying no</h2>
+  <div class="prose">
+    <p>In theory, consent means being able to refuse. In practice, refusal increasingly has a price tag. Since the ICO confirmed in 2025 that ‘consent or pay’ models can be lawful, many UK news sites have adopted them. In my audit, the Guardian lets readers continue free only if they accept all cookies. Refusing personalised advertising requires its £5-a-month Ad-Lite subscription (Fox, 2025). Meta now offers UK users a no-ads subscription at £2.99 a month on the web and £3.99 in its apps (Marketing Week, 2025).</p>
+    <p>Faced with this choice, people overwhelmingly accept.</p>
+  </div>
+  <div class="chart" data-anim>
+    <h3>What people usually do when faced with ‘consent or pay’</h3>
+    <p class="muted small">% of UK adults</p>
+    <div class="bars">
+      <div class="barrow"><span class="barlabel">Accept personalised ads and cookies</span><div class="track"><div class="fill" data-v="37">37%</div></div></div>
+      <div class="barrow"><span class="barlabel">Leave the website</span><div class="track"><div class="fill alt" data-v="19">19%</div></div></div>
+      <div class="barrow"><span class="barlabel">Pay to avoid tracking</span><div class="track"><div class="fill hot small-n" data-v="7"><span>7%</span></div></div></div>
+    </div>
+    <p class="src">Source: ICO (2025). Remaining respondents gave other answers or did not know.</p>
+  </div>
+  <div class="prose">
+    <p>Srnicek (2017) shows how platforms rely on cross-subsidisation: a service is offered ‘free’ to one group because another group, advertisers, pays for access to their data. ‘Consent or pay’ makes this hidden bargain visible. It puts a price on privacy, and in doing so confirms the critical political economy claim that users’ attention and data are the real commodity (Fuchs, 2017). For a student or a low-income household, a £5 subscription is not a neutral alternative. Privacy becomes something people buy, rather than a right everyone holds.</p>
+  </div>
+</section>
+
+<section class="chapter" id="audit">
+  <p class="kicker">My audit, research question 2</p>
+  <h2>Nearly two hours of small print</h2>
+  <div class="prose">
+    <p>Informed consent assumes people can actually read what they agree to. On 6 November 2026, I measured the privacy policies of five platforms that UK adults use daily: Google, the Guardian, TikTok, Instagram and Amazon. I recorded each policy’s length, its estimated reading time at an average adult reading speed of 238 words per minute (Brysbaert, 2019), and its Flesch Reading Ease score.</p>
+    <p>Tick the services you use to see how long it would take you to read their policies once.</p>
+  </div>
+  <div class="chart">
+    <div class="calc">
+      <div class="checks" id="checks"></div>
+      <div>
+        <p class="muted small" style="margin:0">Your reading time</p>
+        <div class="total" id="total">0 min</div>
+        <p class="compare" id="compare"></p>
+      </div>
+    </div>
+    <p class="src">Source: author’s audit, 6 November 2026. Word counts from each platform’s UK-facing privacy policy.</p>
+  </div>
+
+  <div class="chart">
+    <h3>How hard are these policies to read?</h3>
+    <p class="muted small">Flesch Reading Ease, 0–100. Higher is easier. Scores of 60 or above count as plain English.</p>
+    <div class="scale" id="scale" role="img" aria-label="Flesch scores: TikTok 38.2, Amazon 39.5, Instagram 47.4, Google 50.3, the Guardian 52.3. None reach the plain English threshold of 60."></div>
+    <div class="legend" id="legend"></div>
+    <p class="src">Source: author’s audit. Flesch scores calculated on the full policy text; bulleted text can lower scores slightly, so treat them as indicative.</p>
+  </div>
+
+  <div class="prose">
+    <p>None of the five reaches the plain English threshold. TikTok and Amazon score at roughly university reading level. Reading all five policies once would take nearly two hours, and McDonald and Cranor (2008) estimated that reading every privacy policy a typical internet user encounters would take around 201 hours a year. It is unsurprising, then, that most people do not read them: Obar and Oeldorf-Hirsch (2020) called the claim to have read terms ‘the biggest lie on the internet’.</p>
+    <p>I also tested each site’s cookie banner through a UK connection.</p>
+  </div>
+  <div class="chart">
+    <h3>Cookie banners, tested from the UK</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Platform</th><th>Clicks to accept</th><th>Clicks to reject</th><th>‘Reject’ on the first screen</th><th>Pay to refuse tracking?</th></tr></thead>
+        <tbody>
+          <tr><td>Google</td><td>1</td><td>1</td><td>Yes, equally prominent</td><td>No</td></tr>
+          <tr><td>The Guardian</td><td>1</td><td>Paywall</td><td>Free reading requires ‘Accept all’</td><td>Yes, £5 a month (Ad-Lite)</td></tr>
+          <tr><td>TikTok</td><td>1</td><td>1</td><td>Yes, equally prominent</td><td>No</td></tr>
+          <tr><td>Instagram (Meta)</td><td>1</td><td>1</td><td>Yes, less prominent</td><td>For logged-in accounts: £2.99–£3.99 a month for no ads</td></tr>
+          <tr><td>Amazon UK</td><td>1</td><td>1</td><td>Yes, equally prominent</td><td>No</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="src">Source: author’s audit via UK VPN, 6 November 2026; payment details from Fox (2025) and Marketing Week (2025).</p>
+  </div>
+  <div class="chart">
+    <h3>What each banner looked like</h3>
+    <p class="muted small">Diagrams of each banner’s layout, drawn from my audit notes. These are illustrations, not screenshots: wording is simplified and branding removed so the layout of the choice is easy to compare.</p>
+    <div class="wkey"><span class="wb">Solid button</span> prominent option <span class="wb link">Text link</span> less prominent option <span class="wb pay">Dashed</span> costs money</div>
+    <div class="wires">
+
+      <figure role="img" aria-label="Google: Reject all and Accept all appear as two equal buttons on the first screen.">
+        <div class="frame"><div class="chrome"><i></i><i></i><i></i></div><div class="wpage"><div class="ln"></div><div class="ln s"></div><div class="ln"></div>
+          <div class="cb"><div class="q"></div><div class="q s"></div><div class="row"><span class="wb">Reject all</span><span class="wb">Accept all</span></div></div></div></div>
+        <figcaption><span class="tag">Equal choice</span><br><strong>Google.</strong> Accept or reject in one click, with equal prominence.</figcaption>
+      </figure>
+
+      <figure role="img" aria-label="TikTok: accept and decline appear as two equal buttons on the first screen.">
+        <div class="frame"><div class="chrome"><i></i><i></i><i></i></div><div class="wpage"><div class="ln"></div><div class="ln"></div><div class="ln s"></div>
+          <div class="cb"><div class="q"></div><div class="q s"></div><div class="row"><span class="wb">Accept all</span><span class="wb">Decline optional</span></div></div></div></div>
+        <figcaption><span class="tag">Equal choice</span><br><strong>TikTok.</strong> Accept or decline in one click, with equal prominence.</figcaption>
+      </figure>
+
+      <figure role="img" aria-label="Amazon UK: accept and decline appear as two equal buttons on the first screen.">
+        <div class="frame"><div class="chrome"><i></i><i></i><i></i></div><div class="wpage"><div class="ln s"></div><div class="ln"></div><div class="ln"></div>
+          <div class="cb"><div class="q"></div><div class="q s"></div><div class="row"><span class="wb">Accept</span><span class="wb">Decline</span></div></div></div></div>
+        <figcaption><span class="tag">Equal choice</span><br><strong>Amazon UK.</strong> Accept or decline in one click, with equal prominence.</figcaption>
+      </figure>
+
+      <figure role="img" aria-label="Instagram: accept is a solid button, while the option to decline is a less prominent text link.">
+        <div class="frame"><div class="chrome"><i></i><i></i><i></i></div><div class="wpage"><div class="ln"></div><div class="ln s"></div><div class="ln"></div>
+          <div class="cb"><div class="q"></div><div class="q s"></div><div class="row"><span class="wb">Allow all cookies</span><span class="wb link">Decline optional</span></div></div></div></div>
+        <figcaption><span class="tag nudge">Nudge</span><br><strong>Instagram.</strong> Still one click to refuse, but the option is visually played down. Logged-in UK users are separately offered a paid no-ads subscription.</figcaption>
+      </figure>
+
+      <figure class="wide" role="img" aria-label="The Guardian: the first screen shows a prominent accept button and a less prominent reject option. Rejecting leads to a second screen where readers must either accept all or subscribe for five pounds a month.">
+        <div class="pair">
+          <div class="frame"><div class="chrome"><i></i><i></i><i></i></div><div class="wpage"><div class="ln"></div><div class="ln s"></div><div class="ln"></div>
+            <div class="cb"><div class="q"></div><div class="q s"></div><div class="row"><span class="wb">Accept all</span><span class="wb link">Reject</span></div></div></div></div>
+          <span class="arrow" aria-hidden="true">→</span>
+          <div class="frame"><div class="chrome"><i></i><i></i><i></i></div><div class="wpage">
+            <div class="cb wall"><div class="q"></div><div class="q s"></div><div class="row"><span class="wb">Accept all and read free</span><span class="wb pay">Subscribe, £5 a month</span></div></div></div></div>
+        </div>
+        <figcaption><span class="tag paid">Pay to refuse</span><br><strong>The Guardian.</strong> Rejecting takes one click, but it leads to a second screen: accept tracking to keep reading free, or pay £5 a month for Ad-Lite.</figcaption>
+      </figure>
+
+    </div>
+  </div>
+  <div class="prose">
+    <p>The banner results are revealing for a different reason. After pressure from the ICO, rejecting cookies now usually takes one click, the same as accepting. On the surface, the interface problem that Nouwens et al. (2020) documented across European sites appears to have been fixed. But the burden has moved rather than disappeared. It now sits in the length and difficulty of the documents behind the banner, in visual nudges that make ‘reject’ less prominent, and in the price attached to refusal. The banner is compliant; the gap remains.</p>
+  </div>
+</section>
+
+<section class="chapter" id="rights">
+  <p class="kicker">Research question 1</p>
+  <h2>Knowing your rights is not using them</h2>
+  <div class="prose">
+    <p>The ICO tracks public awareness of information rights as a measure of its own performance, and the headline figures look encouraging. Three quarters of UK adults know at least one of their rights, and awareness of the right to be informed when data is collected rose from 44% to 48%.</p>
+  </div>
+  <div class="chart" data-anim>
+    <h3>Awareness of information rights</h3>
+    <p class="muted small">% of UK adults</p>
+    <div class="bars">
+      <div class="barrow"><span class="barlabel">Aware of at least one right</span><div class="track"><div class="fill" data-v="76">76%</div></div></div>
+      <div class="barrow"><span class="barlabel">Aware of the right to be informed</span><div class="track"><div class="fill alt" data-v="48">48%</div></div></div>
+      <div class="barrow"><span class="barlabel">Aware of all listed rights</span><div class="track"><div class="fill hot" data-v="16">16%</div></div></div>
+    </div>
+    <p class="src">Source: ICO (2025).</p>
+  </div>
+  <div class="prose">
+    <p>Reading the data critically, awareness and control are not the same thing. Only 16% know all of their rights. Even those who do still face the same long policies and priced refusals. Solove (2013) argues that ‘privacy self-management’, the model in which individuals protect themselves by reading notices and making choices, cannot work at the scale of modern data collection. Measuring success through awareness keeps responsibility with individuals, a pattern Foucault’s work helps us see: people are governed by being made responsible for managing themselves. Rising awareness alongside persistently low control (19%) suggests the problem is structural, not a lack of knowledge.</p>
+  </div>
+</section>
+
+<section class="chapter" id="left-behind">
+  <p class="kicker">Research question 3</p>
+  <h2>Who gets left behind</h2>
+  <div class="prose">
+    <p>The consent gap is not shared equally. Alongside its main online survey, the ICO interviewed 500 people with very low or no digital familiarity by telephone. Their responses show that those least able to navigate consent are among the most worried, and the least protected by knowledge of their rights.</p>
+  </div>
+  <div class="chart" data-anim>
+    <h3>People with low or no digital engagement</h3>
+    <p class="muted small">% of the 500 digitally disengaged respondents</p>
+    <div class="bars">
+      <div class="barrow"><span class="barlabel">Worry about unwanted information about them online</span><div class="track"><div class="fill" data-v="84">84%</div></div></div>
+      <div class="barrow"><span class="barlabel">Have had to use a device when they didn’t want to</span><div class="track"><div class="fill alt" data-v="47">47%</div></div></div>
+      <div class="barrow"><span class="barlabel">Unaware of any of their information rights</span><div class="track"><div class="fill hot" data-v="44">44%</div></div></div>
+    </div>
+    <p class="src">Source: ICO (2025), telephone survey of 500 UK adults. ‘Had to use a device’ rose from 37% the previous year.</p>
+  </div>
+  <div class="prose">
+    <p>As more public and commercial services move online, people are drawn into data collection whether they wish to be or not. Lyon (2001) describes surveillance as social sorting: it affects groups differently depending on their resources and position. Here, the people most exposed to datafication are those with the fewest tools to question it.</p>
+  </div>
+</section>
+
+<section class="chapter" id="regulation">
+  <p class="kicker">Research question 3</p>
+  <h2>The rules keep moving</h2>
+  <div class="prose">
+    <p>Regulation has narrowed some gaps while widening others. Yellow markers show changes that strengthened users’ position; red markers show changes that loosened it.</p>
+  </div>
+  <ul class="timeline">
+    <li class="tight"><span class="d">May 2018</span>: UK GDPR and the Data Protection Act 2018 make clear, informed, freely given consent a legal standard.</li>
+    <li class="tight"><span class="d">Late 2023</span>: The ICO warns major websites that rejecting cookies must be as easy as accepting them.</li>
+    <li class="tight"><span class="d">April 2024</span>: The Guardian adds a one-click ‘No, thank you’ to its banner.</li>
+    <li class="loose"><span class="d">January 2025</span>: ICO guidance confirms ‘consent or pay’ models can be lawful if certain conditions are met.</li>
+    <li class="loose"><span class="d">March 2025</span>: The Guardian launches Ad-Lite: refusing personalised advertising now costs £5 a month.</li>
+    <li><span class="d">June 2025</span>: The Data (Use and Access) Act 2025 receives Royal Assent.</li>
+    <li class="loose"><span class="d">September 2025</span>: Meta introduces a paid no-ads subscription for UK Facebook and Instagram users.</li>
+    <li class="loose"><span class="d">February 2026</span>: The Act’s cookie changes take effect: some analytics and functionality cookies no longer need prior consent, though users must be told and able to opt out. Maximum fines for breaking the cookie rules rise sharply.</li>
+    <li><span class="d">June 2026</span>: The Act is fully in force.</li>
+  </ul>
+  <div class="prose" style="margin-top:20px">
+    <p>The direction of travel is ambiguous. Stronger enforcement and the ‘reject all’ standard have improved banners. At the same time, regulators have accepted paid refusal and reduced the number of cookies that need consent at all. Advertising and cross-site tracking still require consent, but the overall effect is a model in which consent is easier to give, costlier to withhold, and needed less often.</p>
+  </div>
+</section>
+
+<section class="chapter" id="argument">
+  <p class="kicker">Conclusion</p>
+  <h2>Mind the gap: what this tells us</h2>
+  <div class="prose">
+    <p>Across all three questions, the evidence points the same way. People are increasingly aware of data collection and of their rights (RQ1). But consent, as currently designed, does not translate that awareness into understanding or control (RQ2), and the gap falls hardest on those with the fewest resources (RQ3). The consent gap is not a failure of individual users. It is built into a data economy that depends on extraction.</p>
+  </div>
+  <div class="theory">
+    <div><h3>Data extraction</h3><p>Sadowski (2019) defines extraction as taking data without meaningful consent or fair compensation. A one-click ‘accept’ behind two hours of unread policy meets the letter of consent, not its meaning.</p></div>
+    <div><h3>Platform capitalism</h3><p>Srnicek (2017) and Van Dijck, Poell and de Waal (2018) show platforms are fuelled by data. ‘Consent or pay’ reveals the price of opting out of that fuel supply.</p></div>
+    <div><h3>Privacy self-management</h3><p>Solove (2013) argues that individual choice cannot carry the weight placed on it. The audit shows why: the reading burden alone makes informed choice unrealistic.</p></div>
+    <div><h3>Digital resignation</h3><p>Draper and Turow (2019) explain why people accept despite distrust. The ICO’s mix of scepticism and acceptance fits this pattern closely.</p></div>
+  </div>
+  <div class="manifesto">
+    <h3>Five steps to close the consent gap</h3>
+    <ol>
+      <li><strong>Standardise the small print.</strong> Require short, plain-English summaries in a common format, so policies can be compared at a glance rather than read for two hours.</li>
+      <li><strong>Keep refusal affordable.</strong> Regulators should scrutinise the price of ‘consent or pay’, so privacy does not become a premium product.</li>
+      <li><strong>Measure control, not just awareness.</strong> The ICO should track whether people feel and are in control, and treat the 19% figure as a key indicator.</li>
+      <li><strong>Protect offline routes.</strong> People with low digital engagement need ways to use essential services without being drawn into data collection.</li>
+      <li><strong>Shift from individual clicks to collective enforcement.</strong> Proactive regulation and collective complaints place responsibility on platforms rather than users.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="chapter" id="method">
+  <p class="kicker">Method and limitations</p>
+  <h2>How this project was done</h2>
+  <div class="prose">
+    <p><strong>Secondary data.</strong> Survey figures come from the ICO’s 2025 Public Attitudes report: an online survey of 8,019 UK adults (10 January to 21 February 2025), weighted to the UK online population, plus a telephone survey of 500 people with low or no digital engagement. The data is self-reported, so it captures perceptions rather than behaviour. The report’s executive summary gives the ‘caution’ figure as 52% while the main text gives 51%, a reminder to read such figures carefully. A 2026 edition has since been published, which future work could use to track change.</p>
+    <p><strong>Primary data.</strong> On 6 November 2026, I audited five platforms. I copied each UK-facing privacy policy and calculated its word count, reading time (238 words per minute) and Flesch Reading Ease score. I tested each cookie banner in a private browser window through a UK VPN connection, counting the clicks needed to accept and to reject all non-essential cookies. Where a site’s refusal option involved payment, I confirmed the details against published sources.</p>
+    <p><strong>Limitations.</strong> Five platforms is a small sample, and policies and banners change frequently. Flesch scores are designed for continuous prose and are indicative for structured documents. Instagram’s figures were measured on the Instagram data policy page dated January 2022, which may differ from the current Meta Privacy Policy. Banner tests reflect one browser on one day.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <h2>References</h2>
+  <ul class="refs">
+    <li>Brysbaert, M. (2019) ‘How many words do we read per minute? A review and meta-analysis of reading rate’, <i>Journal of Memory and Language</i>, 109, 104047.</li>
+    <li>Draper, N.A. and Turow, J. (2019) ‘The corporate cultivation of digital resignation’, <i>New Media &amp; Society</i>, 21(8), pp. 1824–1839.</li>
+    <li>Foucault, M. (1980) <i>Power/Knowledge: Selected Interviews and Other Writings 1972–1977</i>. New York: Pantheon.</li>
+    <li>Fox, I. (2025) ‘Ad-Lite – a new product from the Guardian’, <i>The Guardian</i>, March.</li>
+    <li>Fuchs, C. (2017) <i>Social Media: A Critical Introduction</i>. 2nd edn. London: Sage.</li>
+    <li>Information Commissioner’s Office (2025) <i>Public Attitudes to Information Rights 2025</i>. Wilmslow: ICO.</li>
+    <li>Lyon, D. (2001) <i>Surveillance Society: Monitoring Everyday Life</i>. Buckingham: Open University Press.</li>
+    <li>Marketing Week (2025) ‘Meta to introduce paid ad-free subscriptions for Facebook and Instagram in the UK’, <i>Marketing Week</i>, September.</li>
+    <li>McDonald, A.M. and Cranor, L.F. (2008) ‘The cost of reading privacy policies’, <i>I/S: A Journal of Law and Policy for the Information Society</i>, 4(3), pp. 543–568.</li>
+    <li>Nouwens, M., Liccardi, I., Veale, M., Karger, D. and Kagal, L. (2020) ‘Dark patterns after the GDPR: scraping consent pop-ups and demonstrating their influence’, <i>Proceedings of the 2020 CHI Conference on Human Factors in Computing Systems</i>.</li>
+    <li>Obar, J.A. and Oeldorf-Hirsch, A. (2020) ‘The biggest lie on the internet: ignoring the privacy policies and terms of service policies of social networking services’, <i>Information, Communication &amp; Society</i>, 23(1), pp. 128–147.</li>
+    <li>Press Gazette (2025) ‘Guardian, GB News and Newsquest among latest publishers to tell readers: “consent or pay”’, <i>Press Gazette</i>, 14 March.</li>
+    <li>Sadowski, J. (2019) ‘When data is capital: datafication, accumulation, and extraction’, <i>Big Data &amp; Society</i>, 6(1).</li>
+    <li>Solove, D.J. (2013) ‘Privacy self-management and the consent dilemma’, <i>Harvard Law Review</i>, 126(7), pp. 1880–1903.</li>
+    <li>Srnicek, N. (2017) <i>Platform Capitalism</i>. Cambridge: Polity.</li>
+    <li>Van Dijck, J., Poell, T. and de Waal, M. (2018) <i>The Platform Society: Public Values in a Connective World</i>. Oxford: Oxford University Press.</li>
+    <li>Data (Use and Access) Act 2025. London: The Stationery Office.</li>
+  </ul>
+</footer>
+
+<script>
+/* demo banner */
+(function(){
+  const s1=document.getElementById("bStep1"),s2=document.getElementById("bStep2"),out=document.getElementById("bOutcome"),txt=document.getElementById("outcomeText");
+  const msgs={
+    accept:"You accepted. So do most people: 37% of UK adults usually accept personalised ads when asked to ‘consent or pay’, even though only 19% say they feel in control.",
+    pay:"You paid. You’re in a small minority: only 7% of UK adults usually pay to avoid tracking.",
+    leave:"You left. About one in five (19%) UK adults usually leave a site rather than accept or pay. Refusing costs them the content instead."
+  };
+  document.querySelectorAll("#banner [data-choice]").forEach(b=>b.addEventListener("click",()=>{
+    const c=b.dataset.choice;
+    if(c==="reject"){s1.hidden=true;s2.hidden=false;s2.querySelector("button").focus();return}
+    s1.hidden=true;s2.hidden=true;out.hidden=false;txt.textContent=msgs[c];document.getElementById("again").focus();
+  }));
+  document.getElementById("again").addEventListener("click",()=>{out.hidden=true;s2.hidden=true;s1.hidden=false;s1.querySelector("button").focus()});
+})();
+
+/* audit data */
+const AUDIT=[
+  {name:"Google",words:4939,mins:20.8,fre:50.3,abbr:"G"},
+  {name:"The Guardian",words:6386,mins:26.8,fre:52.3,abbr:"Gu"},
+  {name:"TikTok",words:7113,mins:29.9,fre:38.2,abbr:"T"},
+  {name:"Instagram (Meta)",words:4207,mins:17.7,fre:47.4,abbr:"I"},
+  {name:"Amazon UK",words:4559,mins:19.2,fre:39.5,abbr:"A"}
+];
+function fmt(m){m=Math.round(m);if(m<60)return m+" min";const h=Math.floor(m/60),r=m%60;return h+" h "+(r?r+" min":"")}
+(function(){
+  const box=document.getElementById("checks");
+  AUDIT.forEach((p,i)=>{
+    const l=document.createElement("label");
+    l.innerHTML='<input type="checkbox" checked data-i="'+i+'"><span></span><span class="t"></span>';
+    l.querySelector("span").textContent=p.name;
+    l.querySelector(".t").textContent=p.words.toLocaleString("en-GB")+" words · "+fmt(p.mins);
+    box.appendChild(l);
+  });
+  function calc(){
+    let m=0,w=0,n=0;box.querySelectorAll("input").forEach(c=>{if(c.checked){const p=AUDIT[+c.dataset.i];m+=p.mins;w+=p.words;n++}});
+    document.getElementById("total").textContent=fmt(m);
+    const cmp=document.getElementById("compare");
+    if(!n){cmp.textContent="Tick at least one service.";return}
+    let t=w.toLocaleString("en-GB")+" words across "+n+" polic"+(n>1?"ies":"y")+". ";
+    if(m>90)t+="That’s longer than a full football match, for policies you agreed to in seconds.";
+    else if(m>45)t+="That’s longer than a typical university lecture.";
+    else t+="That’s still far longer than the second or two it takes to click ‘accept’.";
+    cmp.textContent=t;
+  }
+  box.addEventListener("change",calc);calc();
+})();
+
+/* flesch scale */
+(function(){
+  const sc=document.getElementById("scale"),lg=document.getElementById("legend");
+  const ax=document.createElement("div");ax.className="axis";sc.appendChild(ax);
+  const ln=document.createElement("div");ln.className="line60";ln.style.left="60%";sc.appendChild(ln);
+  [0,30,60,100].forEach(v=>{const t=document.createElement("span");t.className="tick";t.style.left=v+"%";t.textContent=v===60?"60 plain English":v===30?"30":String(v);sc.appendChild(t)});
+  const sorted=[...AUDIT].sort((a,b)=>a.fre-b.fre);
+  sorted.forEach((p,i)=>{const d=document.createElement("span");d.className="dot";d.style.left=p.fre+"%";d.style.top=(i%2?"6px":"26px");d.textContent=p.abbr;d.title=p.name+": "+p.fre;sc.appendChild(d);
+    const s=document.createElement("span");s.textContent=p.abbr+" = "+p.name+" ("+p.fre.toFixed(1)+")";lg.appendChild(s)});
+})();
+
+/* bar animation: one reveal per chart */
+(function(){
+  const charts=document.querySelectorAll("[data-anim]");
+  const fill=c=>c.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.v+"%");
+  if(!("IntersectionObserver" in window)||matchMedia("(prefers-reduced-motion: reduce)").matches){charts.forEach(fill);return}
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){fill(e.target);io.unobserve(e.target)}}),{threshold:.35});
+  charts.forEach(c=>io.observe(c));
+})();
+</script>
+</body>
+</html>
